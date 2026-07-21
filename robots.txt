@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /registrar.html
+
+Sitemap: https://onefile-lab-site.vercel.app/sitemap.xml

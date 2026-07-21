@@ -188,6 +188,11 @@
     width:34px;height:34px;margin-bottom:18px;color:var(--brass);
     transition:.25s;
   }
+  .product-shot{
+    width:100%;height:150px;object-fit:cover;object-position:top;
+    border-radius:5px;margin-bottom:16px;border:1px solid #1c3a4f;
+    background:var(--ink);
+  }
   .product-card:hover .product-icon{color:var(--signal);transform:scale(1.08);}
   .product-tag{
     display:inline-block;font-family:var(--mono);font-size:10px;color:var(--mist-dim);
@@ -323,7 +328,10 @@ function renderProducts(list){
   const el = document.getElementById('products-grid');
   el.innerHTML = list.map(p=>`
     <div class="product-card">
-      <div class="product-icon">${ICONS[p.icon] || ICONS.grid}</div>
+      ${p.img
+        ? `<img class="product-shot" src="${p.img}" alt="${p.title}" loading="lazy" onerror="this.style.display='none'">`
+        : `<div class="product-icon">${ICONS[p.icon] || ICONS.grid}</div>`
+      }
       <div class="product-tag">${p.tag}</div>
       <h3>${p.title}</h3>
       <p>${p.desc}</p>
@@ -346,7 +354,7 @@ function parseCSV(text){
   // 헤더 행(tag,icon,title,desc) 있으면 건너뜀
   const start = rows[0][0] && rows[0][0].toLowerCase().includes('tag') ? 1 : 0;
   return rows.slice(start).filter(r=>r.length>=4 && r[2]).map(r=>({
-    tag:r[0]?.trim(), icon:r[1]?.trim(), title:r[2]?.trim(), desc:r[3]?.trim()
+    tag:r[0]?.trim(), icon:r[1]?.trim(), title:r[2]?.trim(), desc:r[3]?.trim(), img:r[4]?.trim()||null
   }));
 }
 

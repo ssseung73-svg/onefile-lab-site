@@ -174,6 +174,7 @@
   .product-card{
     background:var(--ink);padding:32px 26px 28px;position:relative;
     transition:.25s;overflow:hidden;
+    display:block;text-decoration:none;color:inherit;cursor:pointer;
   }
   .product-card::before,.product-card::after{
     content:"";position:absolute;width:14px;height:14px;
@@ -307,12 +308,12 @@
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTsR8me47DTt3OKIcB4D9DlhkZjNrcLhHocHPR7lUPuRCAzBeTz5a-IBWCefru9ov2381jo88xTk_88/pub?output=csv";
 
 const DEFAULT_PRODUCTS = [
-  {tag:"BUSINESS · PPTX", icon:"chart", title:"사업계획서 AI 생성기", desc:"BSC 프레임워크로 목표·과제·KPI를 자동 산출하고, Gamma·PPTX 변환용 스크립트까지 함께 뽑아줍니다."},
-  {tag:"COMPLIANCE", icon:"shield", title:"ISO 인증 문서 패키지", desc:"청크 기반 생성으로 상업적 분량 기준을 충족하는 인증 문서 세트를 자동 작성합니다."},
-  {tag:"CONTENT", icon:"pen", title:"유입 성장 다이어리", desc:"블로그 트래픽 성장을 위한 콘텐츠 캘린더와 발행 후 후속 조치까지 관리하는 플래너."},
-  {tag:"OPS · SOP", icon:"clipboard", title:"SOP / 작업지시서 생성기", desc:"현장 표준작업절차서를 실무 QA 문서 수준으로 자동 작성합니다."},
-  {tag:"PROJECT", icon:"grid", title:"프로젝트 관리 스위트", desc:"간트차트, 리스크 트래커, OKR을 하나의 인터페이스에서 관리하는 통합 도구."},
-  {tag:"MEDIA", icon:"play", title:"씬 프롬프트 생성기", desc:"이미지 첨부만으로 숏폼 영상용 씬 프롬프트를 구조화해 뽑아내는 생성기."}
+  {id:"biz-plan", tag:"BUSINESS · PPTX", icon:"chart", title:"사업계획서 AI 생성기", desc:"BSC 프레임워크로 목표·과제·KPI를 자동 산출하고, Gamma·PPTX 변환용 스크립트까지 함께 뽑아줍니다."},
+  {id:"iso-docs", tag:"COMPLIANCE", icon:"shield", title:"ISO 인증 문서 패키지", desc:"청크 기반 생성으로 상업적 분량 기준을 충족하는 인증 문서 세트를 자동 작성합니다."},
+  {id:"blog-growth", tag:"CONTENT", icon:"pen", title:"유입 성장 다이어리", desc:"블로그 트래픽 성장을 위한 콘텐츠 캘린더와 발행 후 후속 조치까지 관리하는 플래너."},
+  {id:"sop", tag:"OPS · SOP", icon:"clipboard", title:"SOP / 작업지시서 생성기", desc:"현장 표준작업절차서를 실무 QA 문서 수준으로 자동 작성합니다."},
+  {id:"pm-suite", tag:"PROJECT", icon:"grid", title:"프로젝트 관리 스위트", desc:"간트차트, 리스크 트래커, OKR을 하나의 인터페이스에서 관리하는 통합 도구."},
+  {id:"scene-prompt", tag:"MEDIA", icon:"play", title:"씬 프롬프트 생성기", desc:"이미지 첨부만으로 숏폼 영상용 씬 프롬프트를 구조화해 뽑아내는 생성기."}
 ];
 
 const ICONS = {
@@ -327,7 +328,7 @@ const ICONS = {
 function renderProducts(list){
   const el = document.getElementById('products-grid');
   el.innerHTML = list.map(p=>`
-    <div class="product-card">
+    <a class="product-card" href="product.html?id=${encodeURIComponent(p.id||'')}">
       ${p.img
         ? `<img class="product-shot" src="${p.img}" alt="${p.title}" loading="lazy" onerror="this.style.display='none'">`
         : `<div class="product-icon">${ICONS[p.icon] || ICONS.grid}</div>`
@@ -335,7 +336,7 @@ function renderProducts(list){
       <div class="product-tag">${p.tag}</div>
       <h3>${p.title}</h3>
       <p>${p.desc}</p>
-    </div>
+    </a>
   `).join('');
 }
 
@@ -354,7 +355,8 @@ function parseCSV(text){
   // 헤더 행(tag,icon,title,desc) 있으면 건너뜀
   const start = rows[0][0] && rows[0][0].toLowerCase().includes('tag') ? 1 : 0;
   return rows.slice(start).filter(r=>r.length>=4 && r[2]).map(r=>({
-    tag:r[0]?.trim(), icon:r[1]?.trim(), title:r[2]?.trim(), desc:r[3]?.trim(), img:r[4]?.trim()||null
+    tag:r[0]?.trim(), icon:r[1]?.trim(), title:r[2]?.trim(), desc:r[3]?.trim(), img:r[4]?.trim()||null,
+    id:r[5]?.trim()||null, video:r[6]?.trim()||null, usage:r[7]?.trim()||null
   }));
 }
 

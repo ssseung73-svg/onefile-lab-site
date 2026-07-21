@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제품 상세 · 원파일랩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root{
+    --ink:#0d1b26; --panel:#122a3a; --grid:#204b63;
+    --signal:#ff6a3d; --brass:#c9a15a; --mist:#9fb4c2; --mist-dim:#5f7c8c;
+    --mono:'IBM Plex Mono',monospace; --sans:'Pretendard',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--ink);color:#eef1e8;font-family:var(--sans);line-height:1.65;}
+  a{color:inherit;}
+  .wrap{max-width:860px;margin:0 auto;padding:0 28px;}
+  header{padding:22px 0;border-bottom:1px solid #1c3a4f;}
+  .brand{font-family:var(--mono);font-weight:700;font-size:15px;display:flex;align-items:center;gap:9px;text-decoration:none;}
+  .brand .dot{width:8px;height:8px;background:var(--signal);border-radius:50%;}
+  main{padding:60px 0 100px;}
+  .back{
+    font-family:var(--mono);font-size:12.5px;color:var(--mist);
+    text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:30px;
+  }
+  .back:hover{color:#eef1e8;}
+  .tag{
+    display:inline-block;font-family:var(--mono);font-size:11px;color:var(--mist-dim);
+    border:1px solid #26485f;border-radius:20px;padding:4px 12px;margin-bottom:18px;
+  }
+  h1{font-size:clamp(26px,4vw,38px);font-weight:700;margin-bottom:16px;letter-spacing:-.01em;}
+  .desc{font-size:16px;color:var(--mist);max-width:600px;margin-bottom:44px;}
+  .video-box{
+    position:relative;width:100%;padding-top:56.25%;
+    background:var(--panel);border:1px solid #1c3a4f;border-radius:8px;overflow:hidden;margin-bottom:44px;
+  }
+  .video-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+  .video-link{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);
+    font-size:13px;color:var(--signal);text-decoration:none;margin-bottom:44px;
+  }
+  .section-title{
+    font-family:var(--mono);font-size:12px;color:var(--brass);
+    letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px;
+  }
+  .usage-list{list-style:none;margin-bottom:44px;}
+  .usage-list li{
+    display:flex;gap:14px;padding:14px 0;border-bottom:1px dashed #1c3a4f;font-size:14.5px;color:var(--mist);
+  }
+  .usage-list li:last-child{border-bottom:none;}
+  .usage-num{font-family:var(--mono);font-size:12px;color:var(--signal);flex-shrink:0;padding-top:1px;}
+  .cta{
+    font-family:var(--mono);font-weight:600;font-size:13.5px;
+    background:var(--signal);color:var(--ink);padding:14px 26px;border-radius:3px;
+    text-decoration:none;display:inline-flex;align-items:center;gap:8px;
+  }
+  .empty{color:var(--mist-dim);font-family:var(--mono);font-size:13px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span>원파일랩 / ONEFILE LAB</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap" id="content">
+    <div class="empty">불러오는 중…</div>
+  </div>
+</main>
+
+<script>
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTsR8me47DTt3OKIcB4D9DlhkZjNrcLhHocHPR7lUPuRCAzBeTz5a-IBWCefru9ov2381jo88xTk_88/pub?output=csv";
+
+function parseCSV(text){
+  const rows = text.trim().split(/\r?\n/).map(line=>{
+    const out=[]; let cur=''; let inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ inQ=!inQ; continue; }
+      if(ch===','&&!inQ){ out.push(cur); cur=''; continue; }
+      cur+=ch;
+    }
+    out.push(cur);
+    return out;
+  });
+  const start = rows[0][0] && rows[0][0].toLowerCase().includes('tag') ? 1 : 0;
+  return rows.slice(start).filter(r=>r.length>=4 && r[2]).map(r=>({
+    tag:r[0]?.trim(), icon:r[1]?.trim(), title:r[2]?.trim(), desc:r[3]?.trim(), img:r[4]?.trim()||null,
+    id:r[5]?.trim()||null, video:r[6]?.trim()||null, usage:r[7]?.trim()||null
+  }));
+}
+
+function youtubeEmbed(url){
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{11})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+}
+
+function render(p){
+  const el = document.getElementById('content');
+  if(!p){
+    el.innerHTML = `<div class="empty">제품을 찾을 수 없습니다. <a href="index.html" style="color:var(--signal)">목록으로 돌아가기</a></div>`;
+    return;
+  }
+  const embed = p.video ? youtubeEmbed(p.video) : null;
+  const videoHtml = embed
+    ? `<div class="video-box"><iframe src="${embed}" allowfullscreen></iframe></div>`
+    : p.video
+      ? `<a class="video-link" href="${p.video}" target="_blank" rel="noopener">▶ 영상 보기 →</a>`
+      : '';
+  const usageSteps = (p.usage||'').split('/').map(s=>s.trim()).filter(Boolean);
+  const usageHtml = usageSteps.length
+    ? `<div class="section-title">사용법</div><ul class="usage-list">${usageSteps.map((s,i)=>`<li><span class="usage-num">0${i+1}</span>${s}</li>`).join('')}</ul>`
+    : '';
+
+  el.innerHTML = `
+    <a class="back" href="index.html">← 전체 제품 보기</a>
+    <div class="tag">${p.tag||''}</div>
+    <h1>${p.title||''}</h1>
+    <p class="desc">${p.desc||''}</p>
+    ${videoHtml}
+    ${usageHtml}
+    <a class="cta" href="https://kmong.com" target="_blank" rel="noopener">크몽에서 구매하기 →</a>
+  `;
+}
+
+const params = new URLSearchParams(location.search);
+const id = params.get('id');
+
+fetch(SHEET_CSV_URL).then(r=>r.text()).then(text=>{
+  const list = parseCSV(text);
+  const found = list.find(p=>p.id===id);
+  render(found);
+}).catch(()=>{
+  document.getElementById('content').innerHTML = `<div class="empty">데이터를 불러오지 못했습니다.</div>`;
+});
+</script>
+
+</body>
+</html>

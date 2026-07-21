@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>원파일랩 · ONEFILE LAB</title>
+<meta name="description" content="서버 없이, 파일 하나로 끝나는 실무 도구. 사업계획서, ISO 문서, 블로그 성장, SOP, 프로젝트 관리 — 브라우저에서 바로 실행되는 단일 HTML 도구.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root{
+    --ink:#0d1b26;
+    --panel:#122a3a;
+    --panel-2:#16334552;
+    --grid:#204b63;
+    --paper:#eef1e8;
+    --paper-dim:#d8ddd0;
+    --signal:#ff6a3d;
+    --signal-dim:#a8492b;
+    --brass:#c9a15a;
+    --mist:#9fb4c2;
+    --mist-dim:#5f7c8c;
+    --mono:'IBM Plex Mono',monospace;
+    --sans:'Pretendard',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--sans);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  a{color:inherit;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+
+  /* blueprint grid backdrop */
+  .grid-bg{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:56px 56px;
+    opacity:.22;
+    mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 90%);
+  }
+
+  /* ===== NAV ===== */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(13,27,38,.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid #1c3a4f;
+  }
+  nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 28px;max-width:1180px;margin:0 auto;
+  }
+  .brand{
+    font-family:var(--mono);font-weight:700;font-size:15px;
+    letter-spacing:.02em;display:flex;align-items:center;gap:9px;
+  }
+  .brand .dot{width:8px;height:8px;background:var(--signal);border-radius:50%;flex-shrink:0;}
+  .brand .sub{color:var(--mist-dim);font-weight:400;font-size:11px;margin-left:2px;}
+  .nav-links{display:flex;gap:32px;font-size:14px;color:var(--mist);}
+  .nav-links a{text-decoration:none;transition:.15s;}
+  .nav-links a:hover{color:var(--paper);}
+  .nav-cta{
+    font-family:var(--mono);font-size:12.5px;font-weight:600;
+    background:var(--signal);color:var(--ink);
+    padding:9px 18px;border-radius:3px;text-decoration:none;
+    letter-spacing:.02em;
+  }
+  @media (max-width:760px){.nav-links{display:none;}}
+
+  /* ===== HERO ===== */
+  .hero{position:relative;padding:88px 0 100px;}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;color:var(--brass);
+    letter-spacing:.16em;text-transform:uppercase;margin-bottom:22px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:22px;height:1px;background:var(--brass);}
+  .hero h1{
+    font-size:clamp(34px,5.4vw,58px);
+    font-weight:700;letter-spacing:-.01em;line-height:1.18;
+    max-width:820px;margin-bottom:22px;
+  }
+  .hero h1 em{
+    font-style:normal;color:var(--signal);
+  }
+  .hero-sub{
+    font-size:17px;color:var(--mist);max-width:560px;margin-bottom:38px;
+  }
+  .hero-ctas{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:70px;}
+  .btn-primary{
+    font-family:var(--mono);font-weight:600;font-size:13.5px;
+    background:var(--signal);color:var(--ink);
+    padding:14px 26px;border-radius:3px;text-decoration:none;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn-ghost{
+    font-family:var(--mono);font-weight:500;font-size:13.5px;
+    border:1px solid var(--grid);color:var(--paper);
+    padding:13px 26px;border-radius:3px;text-decoration:none;
+  }
+
+  /* spec-sheet mockup */
+  .spec-stage{
+    position:relative;
+    background:var(--panel);
+    border:1px solid #1c3a4f;
+    border-radius:8px;
+    padding:0;
+    max-width:840px;
+    overflow:visible;
+  }
+  .spec-topbar{
+    display:flex;align-items:center;gap:8px;
+    padding:12px 16px;border-bottom:1px solid #1c3a4f;
+  }
+  .spec-topbar .b{width:9px;height:9px;border-radius:50%;background:#2a4457;}
+  .spec-topbar .fname{
+    margin-left:10px;font-family:var(--mono);font-size:11.5px;color:var(--mist-dim);
+  }
+  .spec-body{padding:38px 40px 46px;position:relative;}
+  .spec-mock-title{font-weight:700;font-size:20px;margin-bottom:6px;}
+  .spec-mock-desc{color:var(--mist);font-size:13.5px;margin-bottom:24px;}
+  .spec-mock-row{
+    display:flex;gap:12px;margin-bottom:12px;
+  }
+  .spec-mock-field{
+    flex:1;background:var(--ink);border:1px solid #1c3a4f;border-radius:5px;
+    padding:11px 14px;font-size:12.5px;color:var(--mist-dim);font-family:var(--mono);
+  }
+  .spec-mock-btn{
+    margin-top:18px;display:inline-block;
+    background:var(--signal);color:var(--ink);font-family:var(--mono);
+    font-size:12px;font-weight:700;padding:10px 20px;border-radius:4px;
+  }
+
+  /* dimension callouts */
+  .callout{
+    position:absolute;display:flex;align-items:center;gap:8px;
+    font-family:var(--mono);font-size:11px;color:var(--brass);
+    white-space:nowrap;
+  }
+  .callout .line{height:1px;background:var(--brass);opacity:.6;}
+  .callout.c1{top:-34px;left:40px;}
+  .callout.c1 .line{width:30px;}
+  .callout.c2{top:50%;right:-152px;transform:translateY(-50%);}
+  .callout.c2 .line{width:26px;}
+  .callout.c3{bottom:-34px;left:40px;}
+  .callout.c3 .line{width:30px;}
+  @media (max-width:900px){.callout.c2{display:none;}}
+  @media (max-width:600px){.callout{position:static;margin-top:10px;}
+    .callout .line{display:none;}}
+
+  /* ===== PRODUCTS ===== */
+  .section{padding:90px 0;}
+  .section-head{max-width:600px;margin-bottom:52px;}
+  .section-eyebrow{
+    font-family:var(--mono);font-size:12px;color:var(--brass);
+    letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;
+  }
+  .section-head h2{font-size:clamp(24px,3.4vw,34px);font-weight:700;margin-bottom:12px;letter-spacing:-.01em;}
+  .section-head p{color:var(--mist);font-size:15px;}
+
+  .products{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1c3a4f;border:1px solid #1c3a4f;}
+  @media (max-width:900px){.products{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:600px){.products{grid-template-columns:1fr;}}
+  .product-card{
+    background:var(--ink);padding:32px 26px 28px;position:relative;
+    transition:.25s;overflow:hidden;
+  }
+  .product-card::before,.product-card::after{
+    content:"";position:absolute;width:14px;height:14px;
+    border-top:1.5px solid transparent;border-left:1.5px solid transparent;
+    transition:.25s;opacity:0;
+  }
+  .product-card::before{top:8px;left:8px;}
+  .product-card::after{bottom:8px;right:8px;border-top:none;border-left:none;border-bottom:1.5px solid transparent;border-right:1.5px solid transparent;}
+  .product-card:hover{background:var(--panel);transform:translateY(-2px);}
+  .product-card:hover::before,.product-card:hover::after{opacity:1;border-color:var(--signal);}
+  .product-icon{
+    width:34px;height:34px;margin-bottom:18px;color:var(--brass);
+    transition:.25s;
+  }
+  .product-card:hover .product-icon{color:var(--signal);transform:scale(1.08);}
+  .product-tag{
+    display:inline-block;font-family:var(--mono);font-size:10px;color:var(--mist-dim);
+    letter-spacing:.08em;margin-bottom:14px;
+    border:1px solid #26485f;border-radius:20px;padding:3px 10px;
+  }
+  .product-card h3{font-size:17px;font-weight:600;margin-bottom:10px;line-height:1.4;}
+  .product-card p{font-size:13px;color:var(--mist);margin-bottom:0;}
+  .products-loading{padding:40px;font-family:var(--mono);font-size:12px;color:var(--mist-dim);grid-column:1/-1;}
+
+  /* ===== WHY (dimension list) ===== */
+  .why{background:var(--paper);color:var(--ink);}
+  .why .section-eyebrow{color:var(--signal-dim);}
+  .why .section-head p{color:#4a5a52;}
+  .why-list{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid #c9cfc0;}
+  @media (max-width:700px){.why-list{grid-template-columns:1fr;}}
+  .why-item{
+    padding:26px 4px;border-bottom:1px solid #c9cfc0;
+    display:flex;gap:20px;align-items:flex-start;
+  }
+  .why-item:nth-child(odd){border-right:1px solid #c9cfc0;padding-right:26px;}
+  .why-item:nth-child(even){padding-left:26px;}
+  @media (max-width:700px){.why-item:nth-child(odd){border-right:none;padding-right:4px;}}
+  .why-num{font-family:var(--mono);font-size:12px;color:var(--signal-dim);flex-shrink:0;padding-top:2px;}
+  .why-item h4{font-size:15.5px;font-weight:700;margin-bottom:6px;}
+  .why-item p{font-size:13.5px;color:#5a685f;}
+
+  /* ===== CTA ===== */
+  .cta-section{
+    padding:100px 0;text-align:center;position:relative;
+  }
+  .cta-section h2{font-size:clamp(26px,4vw,40px);font-weight:700;margin-bottom:16px;letter-spacing:-.01em;}
+  .cta-section p{color:var(--mist);font-size:15px;margin-bottom:34px;}
+
+  footer{
+    border-top:1px solid #1c3a4f;padding:36px 0;
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:var(--mono);font-size:11.5px;color:var(--mist-dim);
+    flex-wrap:wrap;gap:12px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="brand"><span class="dot"></span>원파일랩<span class="sub">/ ONEFILE LAB</span></div>
+    <div class="nav-links">
+      <a href="#products">제품</a>
+      <a href="#why">작동 방식</a>
+      <a href="#contact">문의</a>
+    </div>
+    <a class="nav-cta" href="#contact">크몽에서 보기 →</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="grid-bg"></div>
+  <div class="wrap" style="position:relative;">
+    <div class="eyebrow">SINGLE-FILE PRODUCTIVITY TOOLS</div>
+    <h1>설치 없이, 서버 없이,<br>파일 <em>하나</em>로 끝나는 실무 도구</h1>
+    <p class="hero-sub">사업계획서부터 ISO 문서, 블로그 성장 플래너까지 — 브라우저에서 바로 실행되는 단일 HTML 도구를 제작합니다. 데이터는 기기 밖으로 나가지 않습니다.</p>
+    <div class="hero-ctas">
+      <a class="btn-primary" href="#products">제품 둘러보기 →</a>
+      <a class="btn-ghost" href="#contact">맞춤 제작 문의</a>
+    </div>
+
+    <div class="spec-stage">
+      <div class="callout c1"><div class="line"></div>브라우저 전용 실행</div>
+      <div class="callout c2"><div class="line"></div>서버 0개 · API 키 로컬 저장</div>
+      <div class="callout c3"><div class="line"></div>클릭 한 번, 즉시 다운로드</div>
+      <div class="spec-topbar">
+        <span class="b"></span><span class="b"></span><span class="b"></span>
+        <span class="fname">business-plan-generator.html</span>
+      </div>
+      <div class="spec-body">
+        <div class="spec-mock-title">사업계획서 AI 생성기</div>
+        <div class="spec-mock-desc">BSC 프레임워크 기반 · 부서별 목표/과제/KPI 자동 산출</div>
+        <div class="spec-mock-row">
+          <div class="spec-mock-field">회사명 / 업종 입력</div>
+          <div class="spec-mock-field">사업 목표 키워드</div>
+        </div>
+        <div class="spec-mock-row">
+          <div class="spec-mock-field">부서 : 영업 / 마케팅 / 운영</div>
+        </div>
+        <div class="spec-mock-btn">사업계획서 생성 →</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="products">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">PRODUCTS</div>
+      <h2>지금까지 만든 도구들</h2>
+      <p>전부 단일 HTML 파일 — 다운로드해서 바로 열면 실행됩니다.</p>
+    </div>
+    <div class="products" id="products-grid">
+      <div class="products-loading">불러오는 중…</div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ============================================================
+// 제품 목록: 구글 스프레드시트에서 자동으로 불러옵니다.
+// 아래 SHEET_CSV_URL 자리에 "웹에 게시"한 CSV 링크를 넣으면
+// 스프레드시트에 행을 추가하는 것만으로 사이트가 자동 갱신됩니다.
+// 링크를 아직 안 넣으셨다면 기본 목록(DEFAULT_PRODUCTS)이 표시됩니다.
+// ============================================================
+const SHEET_CSV_URL = ""; // 예: https://docs.google.com/spreadsheets/d/xxxx/export?format=csv
+
+const DEFAULT_PRODUCTS = [
+  {tag:"BUSINESS · PPTX", icon:"chart", title:"사업계획서 AI 생성기", desc:"BSC 프레임워크로 목표·과제·KPI를 자동 산출하고, Gamma·PPTX 변환용 스크립트까지 함께 뽑아줍니다."},
+  {tag:"COMPLIANCE", icon:"shield", title:"ISO 인증 문서 패키지", desc:"청크 기반 생성으로 상업적 분량 기준을 충족하는 인증 문서 세트를 자동 작성합니다."},
+  {tag:"CONTENT", icon:"pen", title:"유입 성장 다이어리", desc:"블로그 트래픽 성장을 위한 콘텐츠 캘린더와 발행 후 후속 조치까지 관리하는 플래너."},
+  {tag:"OPS · SOP", icon:"clipboard", title:"SOP / 작업지시서 생성기", desc:"현장 표준작업절차서를 실무 QA 문서 수준으로 자동 작성합니다."},
+  {tag:"PROJECT", icon:"grid", title:"프로젝트 관리 스위트", desc:"간트차트, 리스크 트래커, OKR을 하나의 인터페이스에서 관리하는 통합 도구."},
+  {tag:"MEDIA", icon:"play", title:"씬 프롬프트 생성기", desc:"이미지 첨부만으로 숏폼 영상용 씬 프롬프트를 구조화해 뽑아내는 생성기."}
+];
+
+const ICONS = {
+  chart:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>`,
+  shield:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg>`,
+  pen:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4z"/></svg>`,
+  clipboard:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="4" width="14" height="17" rx="1.5"/><path d="M9 4V3h6v1M8 10h8M8 14h8M8 18h5"/></svg>`,
+  grid:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`,
+  play:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4V8z" fill="currentColor" stroke="none"/></svg>`
+};
+
+function renderProducts(list){
+  const el = document.getElementById('products-grid');
+  el.innerHTML = list.map(p=>`
+    <div class="product-card">
+      <div class="product-icon">${ICONS[p.icon] || ICONS.grid}</div>
+      <div class="product-tag">${p.tag}</div>
+      <h3>${p.title}</h3>
+      <p>${p.desc}</p>
+    </div>
+  `).join('');
+}
+
+function parseCSV(text){
+  const rows = text.trim().split(/\r?\n/).map(line=>{
+    const out=[]; let cur=''; let inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ inQ=!inQ; continue; }
+      if(ch===','&&!inQ){ out.push(cur); cur=''; continue; }
+      cur+=ch;
+    }
+    out.push(cur);
+    return out;
+  });
+  // 헤더 행(tag,icon,title,desc) 있으면 건너뜀
+  const start = rows[0][0] && rows[0][0].toLowerCase().includes('tag') ? 1 : 0;
+  return rows.slice(start).filter(r=>r.length>=4 && r[2]).map(r=>({
+    tag:r[0]?.trim(), icon:r[1]?.trim(), title:r[2]?.trim(), desc:r[3]?.trim()
+  }));
+}
+
+if(SHEET_CSV_URL){
+  fetch(SHEET_CSV_URL).then(r=>r.text()).then(text=>{
+    const parsed = parseCSV(text);
+    renderProducts(parsed.length ? parsed : DEFAULT_PRODUCTS);
+  }).catch(()=>renderProducts(DEFAULT_PRODUCTS));
+} else {
+  renderProducts(DEFAULT_PRODUCTS);
+}
+</script>
+
+<section class="section why" id="why">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">WHY SINGLE-FILE</div>
+      <h2>왜 파일 하나로 충분한가</h2>
+      <p>복잡한 설치 과정 없이, 신뢰할 수 있는 방식으로 만듭니다.</p>
+    </div>
+    <div class="why-list">
+      <div class="why-item">
+        <div class="why-num">01</div>
+        <div><h4>설치 과정이 없습니다</h4><p>다운로드한 HTML 파일을 더블클릭하면 바로 실행됩니다. 별도 프로그램이나 회원가입이 필요 없습니다.</p></div>
+      </div>
+      <div class="why-item">
+        <div class="why-num">02</div>
+        <div><h4>서버로 데이터가 전송되지 않습니다</h4><p>입력한 정보와 API 키는 브라우저(로컬)에만 저장됩니다. 제작자를 포함해 누구도 그 데이터를 볼 수 없습니다.</p></div>
+      </div>
+      <div class="why-item">
+        <div class="why-num">03</div>
+        <div><h4>실무 산출물 형식 그대로</h4><p>PPTX, 워드, 표 형식 등 실제 업무에서 바로 쓰는 형식으로 결과물을 뽑습니다.</p></div>
+      </div>
+      <div class="why-item">
+        <div class="why-num">04</div>
+        <div><h4>구매 후 파일은 계속 내 것</h4><p>구독이 아닙니다. 한 번 받은 파일은 인터넷 연결 없이도 계속 사용할 수 있습니다.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section" id="contact">
+  <div class="grid-bg"></div>
+  <div class="wrap" style="position:relative;">
+    <h2>필요한 도구가 목록에 없다면</h2>
+    <p>업무 프로세스를 알려주시면, 맞춤 단일 파일 도구로 제작해 드립니다.</p>
+    <a class="btn-primary" href="https://kmong.com" target="_blank" rel="noopener">크몽에서 문의하기 →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:12px;">
+    <span>© 2026 원파일랩 · ONEFILE LAB</span>
+    <span>ALL TOOLS RUN LOCALLY IN YOUR BROWSER</span>
+  </div>
+</footer>
+
+</body>
+</html>

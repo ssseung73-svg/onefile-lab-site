@@ -121,6 +121,14 @@ function youtubeEmbed(url){
   return m ? `https://www.youtube.com/embed/${m[1]}` : null;
 }
 
+// 구분자로 '/'가 아니라 ' / '(공백-슬래시-공백)를 써야 합니다.
+// URL 자체에 '/'가 여러 번 들어있기 때문에, 순수 '/'로 쪼개면
+// "https://.../d/파일ID" 같은 값이 조각조각 잘려서 깨진 URL이 되어
+// 이미지가 하나도 로드되지 않는 문제가 있었습니다.
+function splitField(str){
+  return (str || '').split(' / ').map(s => s.trim()).filter(Boolean);
+}
+
 function render(p){
   const el = document.getElementById('content');
   if(!p){
@@ -134,12 +142,13 @@ function render(p){
       ? `<a class="video-link" href="${p.video}" target="_blank" rel="noopener">▶ 영상 보기 →</a>`
       : '';
 
-  const longDescHtml = p.longDesc
-    ? `<div class="long-desc">${p.longDesc.split('/').map(par=>`<p>${par.trim()}</p>`).join('')}</div>`
+  const longDescParagraphs = splitField(p.longDesc);
+  const longDescHtml = longDescParagraphs.length
+    ? `<div class="long-desc">${longDescParagraphs.map(par=>`<p>${par}</p>`).join('')}</div>`
     : '';
 
-  const usageSteps = (p.usage||'').split('/').map(s=>s.trim()).filter(Boolean);
-  const usageImgs = (p.usageImages||'').split('/').map(s=>s.trim());
+  const usageSteps = splitField(p.usage);
+  const usageImgs = splitField(p.usageImages);
   const usageHtml = usageSteps.length
     ? `<div class="section-title">사용법</div><ul class="usage-list">${usageSteps.map((s,i)=>`
         <li>
@@ -151,7 +160,7 @@ function render(p){
         </li>`).join('')}</ul>`
     : '';
 
-  const galleryItems = (p.gallery||'').split('/').map(s=>s.trim()).filter(Boolean);
+  const galleryItems = splitField(p.gallery);
   const galleryHtml = galleryItems.length
     ? `<div class="section-title">스크린샷 갤러리</div><div class="gallery-grid">${galleryItems.map(g=>`<img src="${g}" loading="lazy" onerror="this.style.display='none'">`).join('')}</div>`
     : '';

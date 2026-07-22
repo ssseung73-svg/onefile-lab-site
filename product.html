@@ -63,10 +63,12 @@
   .long-desc p:last-child{margin-bottom:0;}
 
   .usage-body{flex:1;}
-  .usage-text{margin-bottom:10px;}
   .usage-shot{
     width:100%;max-width:520px;border-radius:6px;border:1px solid #1c3a4f;
-    display:block;margin-bottom:6px;
+    display:block;margin-bottom:8px;
+  }
+  .usage-text{
+    font-size:13.5px;color:var(--mist);
   }
 
   .gallery-grid{
@@ -154,8 +156,8 @@ function render(p){
         <li>
           <span class="usage-num">0${i+1}</span>
           <div class="usage-body">
-            <div class="usage-text">${s}</div>
             ${usageImgs[i] ? `<img class="usage-shot" src="${usageImgs[i]}" alt="단계 ${i+1}" loading="lazy" onerror="this.style.display='none'">` : ''}
+            <div class="usage-text">${s}</div>
           </div>
         </li>`).join('')}</ul>`
     : '';

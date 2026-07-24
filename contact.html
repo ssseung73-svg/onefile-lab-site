@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>문의 게시판 · 원파일랩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root{
+    --ink:#0d1b26; --panel:#122a3a; --grid:#204b63;
+    --signal:#ff6a3d; --brass:#c9a15a; --mist:#9fb4c2; --mist-dim:#5f7c8c;
+    --mono:'IBM Plex Mono',monospace; --sans:'Pretendard',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--ink);color:#eef1e8;font-family:var(--sans);line-height:1.65;}
+  a{color:inherit;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 28px;}
+  header{padding:22px 0;border-bottom:1px solid #1c3a4f;}
+  .brand{font-family:var(--mono);font-weight:700;font-size:15px;display:flex;align-items:center;gap:9px;text-decoration:none;}
+  .brand .dot{width:8px;height:8px;background:var(--signal);border-radius:50%;}
+  main{padding:60px 0 100px;}
+  .back{
+    font-family:var(--mono);font-size:12.5px;color:var(--mist);
+    text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:30px;
+  }
+  .back:hover{color:#eef1e8;}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;color:var(--brass);
+    letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;
+  }
+  h1{font-size:clamp(26px,4vw,36px);font-weight:700;margin-bottom:14px;letter-spacing:-.01em;}
+  .desc{font-size:15px;color:var(--mist);max-width:520px;margin-bottom:44px;}
+
+  /* form */
+  .form-box{
+    background:var(--panel);border:1px solid #1c3a4f;border-radius:8px;
+    padding:28px 26px;margin-bottom:56px;
+  }
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;font-family:var(--mono);font-size:11.5px;color:var(--mist-dim);
+    margin-bottom:8px;letter-spacing:.03em;
+  }
+  .field input, .field textarea{
+    width:100%;background:var(--ink);border:1px solid #1c3a4f;border-radius:5px;
+    padding:12px 14px;font-size:14px;color:#eef1e8;font-family:var(--sans);
+    outline:none;transition:.15s;
+  }
+  .field input:focus, .field textarea:focus{border-color:var(--signal);}
+  .field textarea{resize:vertical;min-height:100px;}
+  .submit-btn{
+    font-family:var(--mono);font-weight:600;font-size:13.5px;
+    background:var(--signal);color:var(--ink);border:none;
+    padding:13px 26px;border-radius:3px;cursor:pointer;
+  }
+  .submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+  .form-msg{
+    font-family:var(--mono);font-size:12.5px;margin-top:12px;display:none;
+  }
+  .form-msg.ok{color:#7fd99a;}
+  .form-msg.err{color:var(--signal);}
+
+  /* list */
+  .section-title{
+    font-family:var(--mono);font-size:12px;color:var(--brass);
+    letter-spacing:.12em;text-transform:uppercase;margin-bottom:20px;
+  }
+  .q-list{list-style:none;}
+  .q-item{
+    border:1px solid #1c3a4f;border-radius:8px;padding:20px 22px;margin-bottom:14px;
+  }
+  .q-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;}
+  .q-name{font-weight:600;font-size:14px;}
+  .q-meta{display:flex;align-items:center;gap:10px;}
+  .q-time{font-family:var(--mono);font-size:11px;color:var(--mist-dim);}
+  .q-status{
+    font-family:var(--mono);font-size:10.5px;padding:3px 10px;border-radius:20px;
+    border:1px solid #26485f;color:var(--mist-dim);white-space:nowrap;
+  }
+  .q-status.done{color:#7fd99a;border-color:#2a5a3f;}
+  .q-content{font-size:14px;color:var(--mist);margin-bottom:0;white-space:pre-wrap;}
+  .q-answer{
+    margin-top:14px;padding:14px 16px;background:var(--ink);border-radius:6px;
+    border-left:2px solid var(--signal);
+  }
+  .q-answer-label{font-family:var(--mono);font-size:10.5px;color:var(--signal);margin-bottom:6px;}
+  .q-answer-text{font-size:13.5px;color:var(--mist);white-space:pre-wrap;}
+  .empty, .loading{color:var(--mist-dim);font-family:var(--mono);font-size:13px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span>원파일랩 / ONEFILE LAB</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <a class="back" href="index.html">← 홈으로</a>
+    <div class="eyebrow">CONTACT</div>
+    <h1>문의 게시판</h1>
+    <p class="desc">궁금한 점이나 맞춤 제작 문의를 남겨주세요. 확인 후 답변을 이 페이지에 등록해 드립니다.</p>
+
+    <div class="form-box">
+      <form id="qform">
+        <div class="field">
+          <label for="q-name">이름 (닉네임 가능)</label>
+          <input type="text" id="q-name" required maxlength="30" placeholder="예: 홍길동">
+        </div>
+        <div class="field">
+          <label for="q-content">문의 내용</label>
+          <textarea id="q-content" required maxlength="1000" placeholder="문의하실 내용을 입력해주세요"></textarea>
+        </div>
+        <button type="submit" class="submit-btn" id="submit-btn">문의 등록하기</button>
+        <div class="form-msg" id="form-msg"></div>
+      </form>
+    </div>
+
+    <div class="section-title">등록된 문의</div>
+    <ul class="q-list" id="q-list">
+      <li class="loading">불러오는 중…</li>
+    </ul>
+  </div>
+</main>
+
+<script>
+// Apps Script 웹앱 URL
+const API_URL = "https://script.google.com/macros/s/AKfycbzcyDjWRXbrjIQbmHRKPQiRCpy9_4bL5gGEfDUt9ABufcaTob8s-FhAQf_u4hr1wk-c/exec";
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function formatDate(str){
+  const d = new Date(str);
+  if(isNaN(d)) return '';
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function renderList(items){
+  const el = document.getElementById('q-list');
+  if(!items || !items.length){
+    el.innerHTML = `<li class="empty">아직 등록된 문의가 없습니다. 첫 문의를 남겨보세요.</li>`;
+    return;
+  }
+  el.innerHTML = items.map(it => {
+    const done = it.status && it.status.includes('완료');
+    const answerHtml = it.answer
+      ? `<div class="q-answer"><div class="q-answer-label">▸ 답변</div><div class="q-answer-text">${escapeHtml(it.answer)}</div></div>`
+      : '';
+    return `
+      <li class="q-item">
+        <div class="q-top">
+          <span class="q-name">${escapeHtml(it.name)}</span>
+          <span class="q-meta">
+            <span class="q-time">${formatDate(it.timestamp)}</span>
+            <span class="q-status ${done ? 'done' : ''}">${escapeHtml(it.status || '대기중')}</span>
+          </span>
+        </div>
+        <div class="q-content">${escapeHtml(it.content)}</div>
+        ${answerHtml}
+      </li>`;
+  }).join('');
+}
+
+function loadList(){
+  fetch(API_URL)
+    .then(r => r.json())
+    .then(renderList)
+    .catch(() => {
+      document.getElementById('q-list').innerHTML = `<li class="empty">목록을 불러오지 못했습니다.</li>`;
+    });
+}
+
+const form = document.getElementById('qform');
+const msg = document.getElementById('form-msg');
+const btn = document.getElementById('submit-btn');
+
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  const name = document.getElementById('q-name').value.trim();
+  const content = document.getElementById('q-content').value.trim();
+  if(!name || !content) return;
+
+  btn.disabled = true;
+  btn.textContent = '등록 중…';
+  msg.style.display = 'none';
+
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ name, content })
+  })
+  .then(r => r.json())
+  .then(res => {
+    msg.textContent = '문의가 등록되었습니다. 감사합니다.';
+    msg.className = 'form-msg ok';
+    msg.style.display = 'block';
+    form.reset();
+    loadList();
+  })
+  .catch(() => {
+    msg.textContent = '등록에 실패했습니다. 잠시 후 다시 시도해주세요.';
+    msg.className = 'form-msg err';
+    msg.style.display = 'block';
+  })
+  .finally(() => {
+    btn.disabled = false;
+    btn.textContent = '문의 등록하기';
+  });
+});
+
+loadList();
+</script>
+
+</body>
+</html>
